@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-green: #008751;
+  --color-green-dark: #026b40;
+  --color-green-soft: #eaf4ee;
+  --color-green-soft-hover: #dcecdf;
+  --color-green-light: #bfe3cc;
+  --color-yellow: #fcd116;
+  --color-red: #e8112d;
+  --color-ink: #14251c;
+  --color-paper: #f5f6f2;
+  --color-line: #d9ddd2;
+  --color-muted: #5d6b62;
+  --color-text: #3d473f;
+  --color-track: #edefe8;
+
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'Public Sans', Helvetica, Arial, sans-serif;
+
+  --breakpoint-mobile: 47.5rem; /* 760px */
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-green);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--color-green-dark);
+}
+a:hover {
+  color: var(--color-red);
+}
+
+mark {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+  padding: 0 1px;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-table {
+    overflow: visible !important;
+    border: none !important;
+  }
+  .print-table table {
+    min-width: 0 !important;
+    font-size: 9.5px !important;
+  }
+}

@@ -1,25 +1,91 @@
-# CODING AGENTS: READ THIS FIRST
+# Grâce présidentielle 2026 — registre consultable
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Application web statique de consultation publique des 369 personnes graciées par le
+Décret n° 2026-546 du 31 juillet 2026 (République du Bénin) : recherche, filtres,
+tri, graphiques cliquables, vue fiche, export CSV, impression. Page non officielle,
+aucune donnée n'est envoyée à l'extérieur — tout est statique et fonctionne hors
+ligne une fois chargé.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+> Ce dépôt implémente le design produit dans Claude Design
+> (`project/Grace Presidentielle 2026.dc.html`) — voir `README.design-bundle.md` et
+> `chats/` pour l'historique de conception.
 
-## What you should do — IMPORTANT
+## Lancer le projet
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+```bash
+npm install
+npm run dev       # serveur de développement, http://localhost:5173
+```
 
-**Read `project/Grace Presidentielle 2026.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+## Build de production
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+```bash
+npm run build      # écrit un dossier dist/ autonome (déployable sur Netlify/Vercel/GitHub Pages)
+npm run preview    # sert le build de dist/ localement pour vérification
+```
 
-## About the design files
+## Structure
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+```
+src/
+  App.tsx                 orchestration : état, filtres, tri, URL, raccourcis clavier
+  state.ts                forme de l'état (filtres, tri, sélection, pagination)
+  types.ts                types Person / Stats / SortKey / Density
+  data/data.json           les 369 enregistrements enrichis (cat, remis, annee)
+  lib/
+    filtering.ts           matches / getFiltered / facetOptions / median / parsePeine
+    buckets.ts              paliers de durée de détention
+    urlState.ts             lecture/écriture de l'état dans location.hash (lien partageable)
+    csv.ts, download.ts     export CSV (BOM UTF-8)
+    highlight.tsx           surlignage des occurrences de recherche
+  hooks/
+    useMediaQuery.ts         bascule tableau (desktop) / cartes (mobile, <760px)
+  components/
+    Header, Footer, FlagStripe    bandeau institutionnel, devise nationale
+    StatsCartouche                cartouche de statistiques
+    ChartsSection, charts/        graphiques cliquables (ressort, catégorie, année,
+                                   durée, matrice ressort × catégorie)
+    FilterBar, FilterChips        recherche + filtres cumulables + puces actives
+    ResultsBar                    compteur (aria-live), légende, tri, densité
+    PersonTable, PersonCards      registre (desktop) / cartes empilées (mobile)
+    LoadMore                      pagination par paliers de 20
+    DetailPanel                   fiche latérale (précédent/suivant/fermer)
+  styles/tokens.ts           couleurs, typographies, paliers de couleur de durée
+```
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+## Remplacer la charte graphique
 
-## Bundle contents
+Toutes les couleurs et polices sont centralisées à deux endroits qui doivent rester
+synchronisés :
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `MA Kandi detention facility` project files (HTML prototypes, assets, components)
+- `src/styles/tokens.ts` — valeurs utilisées en JS (paliers de couleur des barres de
+  durée, calculs de style dynamiques).
+- `src/index.css` (bloc `@theme`) — les mêmes valeurs exposées comme utilitaires
+  Tailwind (`bg-green`, `text-muted`, `font-display`, etc.).
+
+Pour basculer vers une charte DGI/gouv.bj officielle, remplacer les valeurs dans ces
+deux fichiers ; aucun composant ne code une couleur en dur en dehors de ces tokens
+(à l'exception de quelques nuances de survol calculées à partir du vert primaire).
+
+Les polices (Source Serif 4 pour les titres, Public Sans pour le corps) sont
+chargées depuis Google Fonts via des balises `<link>` dans `index.html`.
+
+## Données
+
+`src/data/data.json` contient les 369 enregistrements du décret, avec deux champs
+dérivés et non officiels : `cat` (catégorie indicative d'infraction, calculée à
+partir du libellé) et `remis` (écart en mois entre la fin normale de peine et la
+date du décret). Le caractère indicatif de ces champs est rappelé dans l'interface
+(bandeau d'en-tête, astérisque du tableau, fiche latérale).
+
+## Qualité
+
+- Responsive jusqu'à ~360 px ; tableau → cartes empilées sous 760 px.
+- Navigation clavier : `↑ ↓ ← →` pour parcourir les fiches, `Échap` pour fermer ;
+  focus visibles (`:focus-visible`) ; `prefers-reduced-motion` respecté.
+- `aria-live` sur le compteur de résultats, `aria-sort` sur les boutons de tri,
+  `aria-pressed` sur les graphiques cliquables.
+- Feuille de style d'impression dédiée (`@media print`) : dépile tout le registre,
+  masque les contrôles interactifs.
+- État (filtres, tri, fiche ouverte) encodé dans `location.hash` → lien partageable
+  via le bouton « Copier le lien ».
