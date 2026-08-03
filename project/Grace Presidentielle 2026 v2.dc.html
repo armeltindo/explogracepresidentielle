@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+  <style>
+    body { margin:0; background:#0E1211; color:#EDEBE3; font-family:"IBM Plex Sans", Helvetica, Arial, sans-serif; -webkit-font-smoothing:antialiased; }
+    ::selection { background:#C9A227; color:#0E1211; }
+    :focus-visible { outline:2px solid #C9A227; outline-offset:3px; }
+    input::placeholder { color:rgba(237,235,227,0.35); }
+    a { color:#C9A227; text-decoration:none; }
+    a:hover { color:#E0BC44; text-decoration:underline; }
+    @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+    @media print {
+      body { background:#fff; color:#111; }
+      .no-print { display:none !important; }
+      .sheet { background:#fff !important; color:#111 !important; }
+    }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:#0E1211;">
+
+  <section style="position:relative; padding:0 0 0 0; border-bottom:1px solid rgba(237,235,227,0.12);">
+    <div class="no-print" style="display:flex; height:3px;">
+      <div style="width:26%; background:#008751;"></div>
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <div style="flex:1; background:#FCD116;"></div>
+        <div style="flex:1; background:#E8112D;"></div>
+      </div>
+    </div>
+    <div style="max-width:1240px; margin:0 auto; padding:72px 40px 56px 40px; display:flex; gap:56px; align-items:flex-end; flex-wrap:wrap;">
+      <div style="flex:1 1 420px;">
+        <p style="margin:0 0 22px 0; font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.16em; text-transform:uppercase; color:rgba(237,235,227,0.5);">République du Bénin · Décret n° 2026-546 · 31 juillet 2026</p>
+        <h1 style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-weight:400; font-size:clamp(44px,6vw,84px); line-height:0.98; letter-spacing:-0.015em;">Grâce<br />présidentielle<br /><span style="font-style:italic; color:#C9A227;">2026</span></h1>
+        <p style="margin:26px 0 0 0; max-width:520px; font-size:15px; line-height:1.65; color:rgba(237,235,227,0.72);">Registre consultable des personnes graciées. La grâce dispense du reliquat de peine d'emprisonnement ; les obligations financières demeurent dues.</p>
+      </div>
+      <div style="flex:0 0 auto; text-align:right;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:clamp(90px,13vw,168px); line-height:0.82; letter-spacing:-0.03em;">369</p>
+        <p style="margin:14px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(237,235,227,0.5);">personnes graciées</p>
+      </div>
+    </div>
+  </section>
+
+  <sc-if value="{{ notLoaded }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:90px 40px; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:13px; color:rgba(237,235,227,0.45);">chargement du registre…</div>
+  </sc-if>
+
+  <sc-if value="{{ loaded }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1240px; margin:0 auto; padding:0 40px 100px 40px;">
+
+    <section style="display:flex; flex-wrap:wrap; gap:2px; border-bottom:1px solid rgba(237,235,227,0.12); padding:34px 0;">
+      <div style="flex:1 1 150px; padding-right:20px;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:40px; line-height:1;">{{ stats.count }}</p>
+        <p style="margin:6px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(237,235,227,0.5);">affichées</p>
+      </div>
+      <div style="flex:1 1 150px; padding-right:20px;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:40px; line-height:1;">{{ stats.cours }}</p>
+        <p style="margin:6px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(237,235,227,0.5);">ressorts</p>
+      </div>
+      <div style="flex:1 1 150px; padding-right:20px;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:40px; line-height:1;">{{ stats.tribs }}</p>
+        <p style="margin:6px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(237,235,227,0.5);">tribunaux</p>
+      </div>
+      <div style="flex:1 1 150px; padding-right:20px;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:40px; line-height:1;">{{ stats.prisons }}</p>
+        <p style="margin:6px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(237,235,227,0.5);">lieux de détention</p>
+      </div>
+      <div style="flex:1 1 150px;">
+        <p style="margin:0; font-family:'Instrument Serif', Georgia, serif; font-size:40px; line-height:1;">{{ stats.mediane }}</p>
+        <p style="margin:6px 0 0 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(237,235,227,0.5);">mois — durée médiane</p>
+      </div>
+    </section>
+
+    <section class="no-print" style="display:flex; gap:56px; flex-wrap:wrap; padding:44px 0; border-bottom:1px solid rgba(237,235,227,0.12);">
+      <div style="flex:1 1 460px;">
+        <p style="margin:0 0 10px 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#C9A227;">01 — vue d'ensemble</p>
+        <p style="margin:0 0 6px 0; font-family:'Instrument Serif', Georgia, serif; font-size:24px;">Une personne, un carré</p>
+        <p style="margin:0 0 20px 0; font-size:13px; color:rgba(237,235,227,0.55);">369 carrés, teintés par nature d'infraction. Cliquer un carré ouvre la fiche.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:3px;">
+          <sc-for list="{{ dots }}" as="d" hint-placeholder-count="60">
+            <div onClick="{{ d.onClick }}" title="{{ d.title }}" style="{{ d.style }}"></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:1 1 320px;">
+        <p style="margin:0 0 6px 0; font-family:'Instrument Serif', Georgia, serif; font-size:24px;">Catégories</p>
+        <p style="margin:0 0 18px 0; font-size:13px; color:rgba(237,235,227,0.55);">Regroupement indicatif, établi d'après le libellé d'infraction — sans valeur officielle.</p>
+        <div style="display:flex; flex-direction:column;">
+          <sc-for list="{{ catLegend }}" as="c" hint-placeholder-count="10">
+            <div onClick="{{ c.onClick }}" role="button" tabIndex="0" style="{{ c.rowStyle }}">
+              <span style="{{ c.swatchStyle }}"></span>
+              <span style="flex:1; font-size:13px;">{{ c.label }}</span>
+              <span style="font-family:'IBM Plex Mono', monospace; font-size:12px; color:rgba(237,235,227,0.5);">{{ c.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section class="no-print" style="padding:44px 0; border-bottom:1px solid rgba(237,235,227,0.12);">
+      <p style="margin:0 0 10px 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#C9A227;">02 — juridictions</p>
+      <p style="margin:0 0 22px 0; font-family:'Instrument Serif', Georgia, serif; font-size:24px;">Par ressort judiciaire</p>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <sc-for list="{{ ressortChart }}" as="b" hint-placeholder-count="5">
+          <div onClick="{{ b.onClick }}" role="button" tabIndex="0" style="{{ b.rowStyle }}">
+            <span style="flex:0 0 240px; font-size:14px;">{{ b.label }}</span>
+            <span style="flex:1; height:22px; background:rgba(237,235,227,0.07); display:block;"><span style="{{ b.fillStyle }}"></span></span>
+            <span style="flex:0 0 56px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:13px; color:rgba(237,235,227,0.6);">{{ b.count }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="no-print" style="position:sticky; top:0; z-index:30; background:rgba(14,18,17,0.94); backdrop-filter:blur(8px); border-bottom:1px solid rgba(237,235,227,0.12); margin:0 -40px; padding:18px 40px 16px 40px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+      <input type="text" value="{{ search }}" onChange="{{ onSearchChange }}" placeholder="Rechercher un nom, une infraction, un dossier, un lieu…" style="flex:1 1 320px; background:transparent; border:none; border-bottom:1px solid rgba(237,235,227,0.28); color:#EDEBE3; font-family:inherit; font-size:16px; padding:10px 2px;" />
+      <select value="{{ filterCour }}" onChange="{{ onCourChange }}" style="background:#141917; border:1px solid rgba(237,235,227,0.18); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:9px 10px;">
+        <option value="">Ressort · tous</option>
+        <sc-for list="{{ courOptions }}" as="opt" hint-placeholder-count="5"><option value="{{ opt.value }}">{{ opt.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterTrib }}" onChange="{{ onTribChange }}" style="background:#141917; border:1px solid rgba(237,235,227,0.18); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:9px 10px;">
+        <option value="">Tribunal · tous</option>
+        <sc-for list="{{ tribOptions }}" as="opt" hint-placeholder-count="8"><option value="{{ opt.value }}">{{ opt.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterCat }}" onChange="{{ onCatChange }}" style="background:#141917; border:1px solid rgba(237,235,227,0.18); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:9px 10px;">
+        <option value="">Catégorie · toutes</option>
+        <sc-for list="{{ catOptions }}" as="opt" hint-placeholder-count="10"><option value="{{ opt.value }}">{{ opt.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterPrison }}" onChange="{{ onPrisonChange }}" style="background:#141917; border:1px solid rgba(237,235,227,0.18); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:9px 10px;">
+        <option value="">Lieu · tous</option>
+        <sc-for list="{{ prisonOptions }}" as="opt" hint-placeholder-count="11"><option value="{{ opt.value }}">{{ opt.label }}</option></sc-for>
+      </select>
+    </section>
+
+    <sc-if value="{{ hasChips }}" hint-placeholder-val="{{ false }}">
+      <section class="no-print" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:16px 0 4px 0;">
+        <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(237,235,227,0.4);">filtres actifs</span>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="2">
+          <button onClick="{{ c.onRemove }}" style="display:flex; align-items:center; gap:7px; background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.45); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:11px; padding:5px 9px; cursor:pointer;" style-hover="background:rgba(201,162,39,0.22);">
+            <span>{{ c.label }}</span><span style="color:#C9A227;">✕</span>
+          </button>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <section style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:20px 0 10px 0; border-bottom:1px solid rgba(237,235,227,0.22);">
+      <div>
+        <p style="margin:0 0 6px 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#C9A227;">03 — registre</p>
+        <p style="margin:0; font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(237,235,227,0.55);">{{ resultLabel }} · rail de durée : 0 → {{ maxDureeLabel }}</p>
+      </div>
+      <div class="no-print" style="display:flex; gap:16px; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:12px;">
+        <button onClick="{{ onSortNum }}" style="{{ sortStyleNum }}">n° {{ sortIndicatorNum }}</button>
+        <button onClick="{{ onSortNom }}" style="{{ sortStyleNom }}">nom {{ sortIndicatorNom }}</button>
+        <button onClick="{{ onSortDuree }}" style="{{ sortStyleDuree }}">durée {{ sortIndicatorDuree }}</button>
+        <button onClick="{{ onResetFilters }}" style="background:none; border:none; color:rgba(237,235,227,0.45); cursor:pointer; font-family:inherit; font-size:12px; text-decoration:underline;">réinitialiser</button>
+        <button onClick="{{ onExportCSV }}" style="background:#C9A227; border:none; color:#0E1211; cursor:pointer; font-family:inherit; font-size:12px; font-weight:500; padding:8px 14px;">exporter csv</button>
+        <button onClick="{{ onPrint }}" style="background:none; border:1px solid rgba(237,235,227,0.22); color:#EDEBE3; cursor:pointer; font-family:inherit; font-size:12px; padding:8px 14px;">imprimer</button>
+      </div>
+    </section>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:90px 20px; text-align:center;">
+        <p style="margin:0 0 6px 0; font-family:'Instrument Serif', Georgia, serif; font-size:28px;">Aucune personne ne correspond</p>
+        <p style="margin:0 0 20px 0; font-size:14px; color:rgba(237,235,227,0.55);">Élargissez la recherche ou levez un filtre.</p>
+        <button onClick="{{ onResetFilters }}" style="background:#C9A227; border:none; color:#0E1211; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:10px 16px; cursor:pointer;">réinitialiser les filtres</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+    <div class="sheet">
+      <sc-for list="{{ rows }}" as="p" hint-placeholder-count="14">
+        <div onClick="{{ p.onClick }}" role="button" tabIndex="0" style="{{ p.rowStyle }}" style-hover="background:rgba(237,235,227,0.04);">
+          <span style="flex:0 0 46px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:rgba(237,235,227,0.4); padding-top:3px;">{{ p.numLabel }}</span>
+          <span style="flex:1 1 230px; min-width:0;">
+            <span style="display:block; font-family:'Instrument Serif', Georgia, serif; font-size:20px; line-height:1.25;">{{ p.nom }}</span>
+            <span style="display:block; margin-top:3px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:rgba(237,235,227,0.4);">{{ p.dossier }}</span>
+          </span>
+          <span style="flex:2 1 300px; min-width:0; font-size:13px; line-height:1.5; color:rgba(237,235,227,0.72);">
+            {{ p.inf }}
+            <span style="display:block; margin-top:5px;"><span style="{{ p.catTagStyle }}">{{ p.cat }}</span></span>
+          </span>
+          <span style="flex:1 1 150px; min-width:0; font-size:12px; line-height:1.6; color:rgba(237,235,227,0.55);">
+            {{ p.prison }}<br />{{ p.cour }}
+          </span>
+          <span style="flex:0 0 170px;">
+            <span style="display:flex; align-items:center; gap:8px;">
+              <span style="flex:1; height:6px; background:rgba(237,235,227,0.09); display:block;"><span style="{{ p.barFillStyle }}"></span></span>
+              <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; color:rgba(237,235,227,0.6); white-space:nowrap;">{{ p.duree }} mo</span>
+            </span>
+            <span style="display:block; margin-top:6px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:rgba(237,235,227,0.42);">{{ p.peine }}</span>
+            <sc-if value="{{ p.hasSursis }}" hint-placeholder-val="{{ false }}">
+              <span style="display:inline-block; margin-top:4px; font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.06em; color:#0E1211; background:#C9A227; padding:1px 5px;">{{ p.fermeLabel }}</span>
+            </sc-if>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+      <div class="no-print" style="display:flex; gap:12px; justify-content:center; align-items:center; padding:34px 0 0 0;">
+        <button onClick="{{ onShowMore }}" style="background:none; border:1px solid rgba(237,235,227,0.28); color:#EDEBE3; font-family:'IBM Plex Mono', monospace; font-size:12px; padding:11px 20px; cursor:pointer;" style-hover="border-color:#C9A227; color:#C9A227;">{{ moreLabel }}</button>
+        <button onClick="{{ onShowAll }}" style="background:none; border:none; color:rgba(237,235,227,0.45); font-family:'IBM Plex Mono', monospace; font-size:12px; cursor:pointer; text-decoration:underline;">{{ showAllLabel }}</button>
+      </div>
+    </sc-if>
+    </sc-if>
+
+  </main>
+  </sc-if>
+
+  <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ false }}">
+    <div class="no-print" onClick="{{ onClosePanel }}" style="position:fixed; inset:0; background:rgba(5,8,7,0.7); z-index:40;"></div>
+    <aside class="no-print" style="position:fixed; top:0; right:0; bottom:0; width:min(440px,94vw); background:#141917; border-left:1px solid rgba(237,235,227,0.14); z-index:41; overflow-y:auto; padding:30px 32px 40px 32px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:26px;">
+        <p style="margin:0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(237,235,227,0.5);">Fiche {{ selected.num }} / 369</p>
+        <button onClick="{{ onClosePanel }}" aria-label="Fermer" style="background:none; border:1px solid rgba(237,235,227,0.22); color:#EDEBE3; width:30px; height:30px; cursor:pointer; font-size:14px; line-height:1;">✕</button>
+      </div>
+      <h2 style="margin:0 0 10px 0; font-family:'Instrument Serif', Georgia, serif; font-weight:400; font-size:34px; line-height:1.08;">{{ selected.nom }}</h2>
+      <span style="{{ selectedCatTagStyle }}">{{ selected.cat }}</span>
+
+      <p style="margin:26px 0 0 0; font-size:15px; line-height:1.6;">{{ selected.inf }}</p>
+
+      <div style="margin-top:30px; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Ressort</span>
+          <span style="font-size:13px; text-align:right;">{{ selected.cour }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Tribunal</span>
+          <span style="font-size:13px; text-align:right;">{{ selected.trib }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Lieu de détention</span>
+          <span style="font-size:13px; text-align:right;">{{ selected.prison }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Mandat de dépôt</span>
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:13px;">{{ selected.mandat }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Fin normale de peine</span>
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:13px;">{{ selected.fin }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Peine prononcée</span>
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:13px;">{{ selected.peine }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(237,235,227,0.12); border-bottom:1px solid rgba(237,235,227,0.12);">
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">N° dossier</span>
+          <span style="font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right;">{{ selected.dossier }}</span>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;">
+        <p style="margin:0 0 8px 0; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(237,235,227,0.45);">Détention exécutée</p>
+        <div style="height:8px; background:rgba(237,235,227,0.09);"><div style="{{ selectedBarFillStyle }}"></div></div>
+        <p style="margin:8px 0 0 0; font-family:'Instrument Serif', Georgia, serif; font-size:26px;">{{ selected.duree }} <span style="font-size:15px; font-family:'IBM Plex Sans', sans-serif; color:rgba(237,235,227,0.55);">mois</span></p>
+      </div>
+
+      <p style="margin:26px 0 0 0; padding-top:16px; border-top:1px solid rgba(237,235,227,0.12); font-size:12px; line-height:1.6; color:rgba(237,235,227,0.5);">La grâce porte uniquement sur le reliquat de peine d'emprisonnement. Amendes, dommages-intérêts et frais de justice restent exigibles. Catégorie indicative, non officielle.</p>
+    </aside>
+  </sc-if>
+
+  <footer style="border-top:1px solid rgba(237,235,227,0.12); padding:34px 40px 44px 40px;">
+    <div style="max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(237,235,227,0.45);">
+      <span>Fraternité — Justice — Travail</span>
+      <span>Page non officielle · aucune donnée transmise à l'extérieur</span>
+      <span>Décret n° 2026-546 du 31 juillet 2026</span>
+    </div>
+  </footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 1000},
+  &quot;afficherMatrice&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Visualisations&quot;},
+  &quot;statsSurFiltre&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Statistiques&quot;}
+}">
+const CAT_COLORS = {
+  'Vol & recel': 'oklch(0.74 0.11 145)',
+  'Escroquerie & abus de confiance': 'oklch(0.74 0.11 95)',
+  'Atteintes à la personne': 'oklch(0.74 0.11 40)',
+  'Autres': 'oklch(0.74 0.05 200)',
+  'Association de malfaiteurs': 'oklch(0.74 0.11 20)',
+  'Affaires foncières': 'oklch(0.74 0.11 250)',
+  'Cybercriminalité': 'oklch(0.74 0.11 300)',
+  'Violences & menaces': 'oklch(0.74 0.11 350)',
+  'Infractions économiques & fiscales': 'oklch(0.74 0.11 175)',
+  'Stupéfiants & armes': 'oklch(0.74 0.11 70)',
+};
+
+class Component extends DCLogic {
+  state = {
+    data: [], loaded: false, search: '',
+    filterCour: '', filterTrib: '', filterCat: '', filterPrison: '',
+    sortKey: 'num', sortDir: 'asc', selected: null, visibleCount: 60,
+  };
+
+  componentDidMount() {
+    fetch('./data.json').then((r) => r.json())
+      .then((data) => this.setState({ data, loaded: true }))
+      .catch(() => this.setState({ loaded: true, data: [] }));
+    this.onKey = (e) => { if (e.key === 'Escape' && this.state.selected) this.setState({ selected: null }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); }
+
+  onSearchChange = (e) => this.setState({ search: e.target.value, visibleCount: 60 });
+  onCourChange = (e) => this.setState({ filterCour: e.target.value, visibleCount: 60 });
+  onTribChange = (e) => this.setState({ filterTrib: e.target.value, visibleCount: 60 });
+  onCatChange = (e) => this.setState({ filterCat: e.target.value, visibleCount: 60 });
+  onPrisonChange = (e) => this.setState({ filterPrison: e.target.value, visibleCount: 60 });
+  onResetFilters = () => this.setState({ search: '', filterCour: '', filterTrib: '', filterCat: '', filterPrison: '', visibleCount: 60 });
+  onClosePanel = () => this.setState({ selected: null });
+  onPrint = () => this.setState({ visibleCount: 1e6 }, () => setTimeout(() => window.print(), 120));
+  onShowMore = () => this.setState((s) => ({ visibleCount: s.visibleCount + 60 }));
+  onShowAll = () => this.setState({ visibleCount: 1e6 });
+
+  sortBy = (key) => this.setState((s) => ({ sortKey: key, sortDir: s.sortKey === key && s.sortDir === 'asc' ? 'desc' : 'asc' }));
+  onSortNum = () => this.sortBy('num');
+  onSortNom = () => this.sortBy('nom');
+  onSortDuree = () => this.sortBy('duree');
+  toggleCour = (v) => this.setState((s) => ({ filterCour: s.filterCour === v ? '' : v, visibleCount: 60 }));
+  toggleCat = (v) => this.setState((s) => ({ filterCat: s.filterCat === v ? '' : v, visibleCount: 60 }));
+
+  catColor(cat) { return CAT_COLORS[cat] || 'oklch(0.74 0.05 200)'; }
+
+  parsePeine(str) {
+    const t = str.match(/(\d+)\s*mois/);
+    const total = t ? parseInt(t[1], 10) : null;
+    const f = str.match(/dont\s*(\d+)\s*mois\s*ferme/i);
+    return { total, ferme: f ? parseInt(f[1], 10) : total };
+  }
+
+  matches(p, s) {
+    const q = s.search.trim().toLowerCase();
+    if (q && !(p.nom + ' ' + p.inf + ' ' + p.dossier + ' ' + p.prison + ' ' + p.trib).toLowerCase().includes(q)) return false;
+    if (s.filterCour && p.cour !== s.filterCour) return false;
+    if (s.filterTrib && p.trib !== s.filterTrib) return false;
+    if (s.filterCat && p.cat !== s.filterCat) return false;
+    if (s.filterPrison && p.prison !== s.filterPrison) return false;
+    return true;
+  }
+
+  getFiltered(s) {
+    const dir = s.sortDir === 'asc' ? 1 : -1;
+    return s.data.filter((p) => this.matches(p, s)).sort((a, b) => {
+      if (s.sortKey === 'nom') return a.nom.localeCompare(b.nom, 'fr') * dir;
+      if (s.sortKey === 'duree') return (a.duree - b.duree) * dir;
+      return (a.num - b.num) * dir;
+    });
+  }
+
+  median(nums) {
+    if (!nums.length) return 0;
+    const a = [...nums].sort((x, y) => x - y);
+    const m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2);
+  }
+
+  options(data, key) {
+    const map = new Map();
+    data.forEach((p) => map.set(p[key], (map.get(p[key]) || 0) + 1));
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], 'fr'))
+      .map(([value, count]) => ({ value, label: value + ' · ' + count }));
+  }
+
+  exportCSV = () => {
+    const filtered = this.getFiltered(this.state);
+    const headers = ['N°', 'Nom et prénoms', 'Infraction', 'Catégorie (indicative)', 'Ressort', 'Tribunal', 'Lieu de détention', 'Mandat de dépôt', 'Fin normale de peine', 'Peine prononcée', 'Détention (mois)', 'N° dossier'];
+    const esc = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [headers.map(esc).join(';')];
+    filtered.forEach((p) => lines.push([p.num, p.nom, p.inf, p.cat, p.cour, p.trib, p.prison, p.mandat, p.fin, p.peine, p.duree, p.dossier].map(esc).join(';')));
+    const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'grace-presidentielle-2026.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const data = s.data;
+    const showDots = this.props.afficherMatrice ?? true;
+    const maxDuree = data.length ? Math.max(...data.map((d) => d.duree)) : 1;
+    const filtered = this.getFiltered(s);
+    const selNum = s.selected ? s.selected.num : null;
+
+    const tagStyle = (cat, size) => 'display:inline-block; padding:2px 7px; font-family:"IBM Plex Mono", monospace; font-size:' + size + 'px; letter-spacing:0.04em; color:' + this.catColor(cat) + '; border:1px solid ' + this.catColor(cat) + '; opacity:0.9;';
+
+    const shown = filtered.slice(0, s.visibleCount);
+    const rows = shown.map((p) => {
+      const { total, ferme } = this.parsePeine(p.peine);
+      const hasSursis = total != null && ferme != null && ferme < total;
+      const pct = Math.min(100, Math.round((p.duree / maxDuree) * 100));
+      const sel = selNum === p.num;
+      return {
+        ...p,
+        numLabel: String(p.num).padStart(3, '0'),
+        onClick: () => this.setState({ selected: p }),
+        rowStyle: 'display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap; padding:18px 8px; cursor:pointer; border-bottom:1px solid rgba(237,235,227,0.09); background:' + (sel ? 'rgba(201,162,39,0.09)' : 'transparent') + ';',
+        catTagStyle: tagStyle(p.cat, 10),
+        hasSursis,
+        fermeLabel: hasSursis ? ferme + ' mois ferme' : '',
+        barFillStyle: 'display:block; height:100%; width:' + pct + '%; background:' + this.catColor(p.cat) + ';',
+      };
+    });
+
+    const dots = showDots ? data.map((p) => ({
+      onClick: () => this.setState({ selected: p }),
+      title: p.num + ' · ' + p.nom + ' · ' + p.cat + ' · ' + p.duree + ' mois',
+      style: 'width:11px; height:11px; cursor:pointer; background:' + this.catColor(p.cat) + '; opacity:' + (this.matches(p, s) ? 1 : 0.16) + '; outline:' + (selNum === p.num ? '2px solid #EDEBE3' : 'none') + '; outline-offset:1px;',
+    })) : [];
+
+    const counts = (key) => {
+      const m = new Map();
+      data.forEach((p) => m.set(p[key], (m.get(p[key]) || 0) + 1));
+      return [...m.entries()].sort((a, b) => b[1] - a[1]);
+    };
+
+    const catEntries = counts('cat');
+    const catLegend = catEntries.map(([label, count]) => {
+      const active = s.filterCat === label;
+      return {
+        label, count,
+        onClick: () => this.toggleCat(label),
+        rowStyle: 'display:flex; align-items:center; gap:10px; padding:8px 8px; cursor:pointer; border-bottom:1px solid rgba(237,235,227,0.09); background:' + (active ? 'rgba(201,162,39,0.1)' : 'transparent') + ';',
+        swatchStyle: 'display:block; width:11px; height:11px; flex:0 0 11px; background:' + this.catColor(label) + ';',
+      };
+    });
+
+    const courEntries = counts('cour');
+    const maxCour = courEntries.length ? courEntries[0][1] : 1;
+    const ressortChart = courEntries.map(([label, count]) => {
+      const active = s.filterCour === label;
+      return {
+        label, count,
+        onClick: () => this.toggleCour(label),
+        rowStyle: 'display:flex; align-items:center; gap:18px; padding:7px 8px; cursor:pointer; background:' + (active ? 'rgba(201,162,39,0.1)' : 'transparent') + ';',
+        fillStyle: 'display:block; height:100%; width:' + Math.round((count / maxCour) * 100) + '%; background:' + (active ? '#C9A227' : 'rgba(237,235,227,0.55)') + ';',
+      };
+    });
+
+    const base = (this.props.statsSurFiltre ?? true) ? filtered : data;
+    const stats = {
+      count: filtered.length,
+      cours: new Set(base.map((p) => p.cour)).size,
+      tribs: new Set(base.map((p) => p.trib)).size,
+      prisons: new Set(base.map((p) => p.prison)).size,
+      mediane: this.median(base.map((p) => p.duree)),
+    };
+
+    const sortBtn = (key) => 'background:none; border:none; cursor:pointer; font-family:inherit; font-size:12px; padding:0; color:' + (s.sortKey === key ? '#C9A227' : 'rgba(237,235,227,0.6)') + ';';
+
+    let selectedBarFillStyle = '';
+    if (s.selected) {
+      const pct = Math.min(100, Math.round((s.selected.duree / maxDuree) * 100));
+      selectedBarFillStyle = 'height:100%; width:' + pct + '%; background:' + this.catColor(s.selected.cat) + ';';
+    }
+
+    const chips = [];
+    if (s.search.trim()) chips.push({ label: '« ' + s.search.trim() + ' »', onRemove: () => this.setState({ search: '', visibleCount: 60 }) });
+    if (s.filterCour) chips.push({ label: s.filterCour, onRemove: () => this.setState({ filterCour: '', visibleCount: 60 }) });
+    if (s.filterTrib) chips.push({ label: s.filterTrib, onRemove: () => this.setState({ filterTrib: '', visibleCount: 60 }) });
+    if (s.filterCat) chips.push({ label: s.filterCat, onRemove: () => this.setState({ filterCat: '', visibleCount: 60 }) });
+    if (s.filterPrison) chips.push({ label: s.filterPrison, onRemove: () => this.setState({ filterPrison: '', visibleCount: 60 }) });
+
+    const remaining = filtered.length - rows.length;
+
+    return {
+      loaded: s.loaded, notLoaded: !s.loaded,
+      hasRows: rows.length > 0, isEmpty: s.loaded && rows.length === 0,
+      chips, hasChips: chips.length > 0,
+      hasMore: remaining > 0,
+      moreLabel: 'afficher 60 de plus · ' + remaining + ' restantes',
+      showAllLabel: 'tout afficher (' + filtered.length + ')',
+      onShowMore: this.onShowMore, onShowAll: this.onShowAll,
+      maxDureeLabel: maxDuree + ' mois',
+      search: s.search, onSearchChange: this.onSearchChange,
+      filterCour: s.filterCour, filterTrib: s.filterTrib, filterCat: s.filterCat, filterPrison: s.filterPrison,
+      onCourChange: this.onCourChange, onTribChange: this.onTribChange, onCatChange: this.onCatChange, onPrisonChange: this.onPrisonChange,
+      onResetFilters: this.onResetFilters,
+      courOptions: this.options(data, 'cour'), tribOptions: this.options(data, 'trib'),
+      catOptions: this.options(data, 'cat'), prisonOptions: this.options(data, 'prison'),
+      rows, dots, catLegend, ressortChart, stats,
+      resultLabel: filtered.length + ' personne' + (filtered.length !== 1 ? 's' : '') + ' sur 369 · ' + rows.length + ' affichée' + (rows.length !== 1 ? 's' : ''),
+      sortIndicatorNum: s.sortKey === 'num' ? (s.sortDir === 'asc' ? '↑' : '↓') : '',
+      sortIndicatorNom: s.sortKey === 'nom' ? (s.sortDir === 'asc' ? '↑' : '↓') : '',
+      sortIndicatorDuree: s.sortKey === 'duree' ? (s.sortDir === 'asc' ? '↑' : '↓') : '',
+      sortStyleNum: sortBtn('num'), sortStyleNom: sortBtn('nom'), sortStyleDuree: sortBtn('duree'),
+      onSortNum: this.onSortNum, onSortNom: this.onSortNom, onSortDuree: this.onSortDuree,
+      onExportCSV: this.exportCSV, onPrint: this.onPrint,
+      hasSelected: !!s.selected, selected: s.selected || {}, onClosePanel: this.onClosePanel,
+      selectedBarFillStyle,
+      selectedCatTagStyle: s.selected ? tagStyle(s.selected.cat, 11) : '',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
