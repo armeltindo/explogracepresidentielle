@@ -3,6 +3,22 @@ import { highlight } from '../lib/highlight';
 import { tierColor } from '../styles/tokens';
 import type { Density, Person } from '../types';
 
+const HEADERS = [
+  'N°',
+  'Nom et prénoms',
+  'Infraction',
+  'Catégorie*',
+  'Ressort',
+  'Tribunal',
+  'Lieu de détention',
+  'Mandat',
+  'Fin normale',
+  'Peine',
+  'Durée exécutée',
+  'Reliquat remis',
+  'N° dossier',
+];
+
 interface Props {
   rows: Person[];
   maxDuree: number;
@@ -20,19 +36,11 @@ export function PersonTable({ rows, maxDuree, query, density, selected, onSelect
       <table className="w-full min-w-[1560px] border-collapse text-[13px]">
         <thead>
           <tr className="bg-ink text-left text-white">
-            <th className="px-3 py-[10px] font-semibold">N°</th>
-            <th className="px-3 py-[10px] font-semibold">Nom et prénoms</th>
-            <th className="px-3 py-[10px] font-semibold">Infraction</th>
-            <th className="px-3 py-[10px] font-semibold">Catégorie*</th>
-            <th className="px-3 py-[10px] font-semibold">Ressort</th>
-            <th className="px-3 py-[10px] font-semibold">Tribunal</th>
-            <th className="px-3 py-[10px] font-semibold">Lieu de détention</th>
-            <th className="px-3 py-[10px] font-semibold">Mandat</th>
-            <th className="px-3 py-[10px] font-semibold">Fin normale</th>
-            <th className="px-3 py-[10px] font-semibold">Peine</th>
-            <th className="px-3 py-[10px] font-semibold">Durée exécutée</th>
-            <th className="px-3 py-[10px] font-semibold">Reliquat remis</th>
-            <th className="px-3 py-[10px] font-semibold">N° dossier</th>
+            {HEADERS.map((h) => (
+              <th key={h} className="px-3 py-[10px] font-semibold">
+                {h}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -74,10 +82,7 @@ export function PersonTable({ rows, maxDuree, query, density, selected, onSelect
                 <td className={`${pad} align-top text-text`}>
                   <div className="flex min-w-[140px] items-center gap-2">
                     <div className="h-[9px] flex-1 bg-track">
-                      <div
-                        className="h-full"
-                        style={{ width: `${pct}%`, background: tierColor(p.duree) }}
-                      />
+                      <div className="h-full" style={{ width: `${pct}%`, background: tierColor(p.duree) }} />
                     </div>
                     <span className="text-xs whitespace-nowrap text-muted">{p.duree} mois</span>
                   </div>

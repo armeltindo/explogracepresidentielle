@@ -80,4 +80,16 @@ select {
     min-width: 0 !important;
     font-size: 9.5px !important;
   }
+
+  /* "Imprimer cette fiche" (single-record print), toggled via src/lib/printFiche.ts */
+  body.print-fiche-only .app-chrome {
+    display: none !important;
+  }
+  body.print-fiche-only .fiche-panel {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
 }

@@ -1,3 +1,4 @@
+import { buildReportIssueUrl } from '../lib/reportIssue';
 import { tierColor } from '../styles/tokens';
 import type { Person } from '../types';
 
@@ -25,6 +26,7 @@ interface Props {
   onFilterSameCour: () => void;
   onFilterSameCat: () => void;
   onFilterSamePrison: () => void;
+  onPrintFiche: () => void;
 }
 
 export function DetailPanel({
@@ -36,14 +38,15 @@ export function DetailPanel({
   onFilterSameCour,
   onFilterSameCat,
   onFilterSamePrison,
+  onPrintFiche,
 }: Props) {
   const pct = Math.min(100, Math.round((person.duree / maxDuree) * 100));
 
   return (
     <>
       <div className="no-print fixed inset-0 z-40 bg-ink/45" onClick={onClose} />
-      <aside className="no-print fixed top-0 right-0 bottom-0 z-40 w-[min(440px,94vw)] overflow-y-auto bg-white px-7 pt-[26px] pb-10 shadow-[-6px_0_24px_rgba(20,37,28,0.2)]">
-        <div className="mb-[18px] flex items-center justify-between gap-[10px]">
+      <aside className="no-print fiche-panel fixed top-0 right-0 bottom-0 z-40 w-[min(440px,94vw)] overflow-y-auto bg-white px-7 pt-[26px] pb-10 shadow-[-6px_0_24px_rgba(20,37,28,0.2)]">
+        <div className="no-print mb-[18px] flex items-center justify-between gap-[10px]">
           <p className="m-0 text-xs tracking-[0.06em] text-muted uppercase">Fiche {person.num} / 369</p>
           <div className="flex gap-[6px]">
             <button
@@ -104,7 +107,7 @@ export function DetailPanel({
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="no-print mt-5 flex flex-wrap gap-2">
           <button
             onClick={onFilterSameCour}
             className="cursor-pointer border border-line bg-white px-3 py-2 text-xs hover:border-green"
@@ -123,6 +126,23 @@ export function DetailPanel({
           >
             Voir ce lieu
           </button>
+        </div>
+
+        <div className="no-print mt-2 flex flex-wrap gap-2">
+          <button
+            onClick={onPrintFiche}
+            className="cursor-pointer border border-line bg-white px-3 py-2 text-xs hover:border-green"
+          >
+            Imprimer cette fiche
+          </button>
+          <a
+            href={buildReportIssueUrl({ num: person.num, nom: person.nom, dossier: person.dossier })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block cursor-pointer border border-line bg-white px-3 py-2 text-xs text-ink no-underline hover:border-green hover:text-ink"
+          >
+            Signaler une erreur ↗
+          </a>
         </div>
 
         <p className="m-0 mt-[22px] border-t border-line pt-[14px] text-xs leading-[1.6] text-muted">

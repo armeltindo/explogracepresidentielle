@@ -24,6 +24,20 @@ npm run build      # écrit un dossier dist/ autonome (déployable sur Netlify/V
 npm run preview    # sert le build de dist/ localement pour vérification
 ```
 
+## Vérifications
+
+```bash
+npm run typecheck    # tsc -b
+npm run lint         # oxlint
+npm run test         # vitest run — logique pure (filtres/tri/CSV/médiane/…)
+npm run validate-data # sanity checks sur src/data/data.json (369 lignes, numérotation, dates…)
+```
+
+Ces quatre commandes tournent dans `.github/workflows/ci.yml` sur chaque push/PR
+vers `main`. Un job de déploiement (déclenché uniquement sur push vers `main`)
+publie ensuite `dist/` sur GitHub Pages via `actions/deploy-pages` — **à activer une
+fois** dans Settings → Pages → Source : « GitHub Actions » sur le dépôt GitHub.
+
 ## Structure
 
 ```
@@ -38,19 +52,27 @@ src/
     urlState.ts             lecture/écriture de l'état dans location.hash (lien partageable)
     csv.ts, download.ts     export CSV (BOM UTF-8)
     highlight.tsx           surlignage des occurrences de recherche
+    reportIssue.ts           lien pré-rempli vers les issues GitHub du dépôt
+    printFiche.ts            bascule le mode « impression d'une seule fiche »
+    *.test.ts                tests Vitest (lib/, styles/) — voir `npm run test`
   hooks/
     useMediaQuery.ts         bascule tableau (desktop) / cartes (mobile, <760px)
   components/
     Header, Footer, FlagStripe    bandeau institutionnel, devise nationale
+    ErrorBoundary                 filet de sécurité si le rendu plante (recharger la page)
+    MethodologyModal               méthodologie : source, calcul cat/remis, signalement
     StatsCartouche                cartouche de statistiques
     ChartsSection, charts/        graphiques cliquables (ressort, catégorie, année,
                                    durée, matrice ressort × catégorie)
-    FilterBar, FilterChips        recherche + filtres cumulables + puces actives
+    FilterBar, FilterChips        recherche (débouncée) + filtres cumulables + puces actives
     ResultsBar                    compteur (aria-live), légende, tri, densité
     PersonTable, PersonCards      registre (desktop) / cartes empilées (mobile)
     LoadMore                      pagination par paliers de 20
-    DetailPanel                   fiche latérale (précédent/suivant/fermer)
+    DetailPanel                   fiche latérale (précédent/suivant/fermer/imprimer/signaler)
   styles/tokens.ts           couleurs, typographies, paliers de couleur de durée
+
+scripts/validate-data.mjs    validation structurelle de data.json (voir « Vérifications »)
+.github/workflows/ci.yml     typecheck + lint + validate-data + test + build (+ déploiement Pages)
 ```
 
 ## Remplacer la charte graphique
@@ -86,6 +108,29 @@ date du décret). Le caractère indicatif de ces champs est rappelé dans l'inte
 - `aria-live` sur le compteur de résultats, `aria-sort` sur les boutons de tri,
   `aria-pressed` sur les graphiques cliquables.
 - Feuille de style d'impression dédiée (`@media print`) : dépile tout le registre,
-  masque les contrôles interactifs.
+  masque les contrôles interactifs. Bouton « Imprimer cette fiche » dans le panneau
+  latéral pour n'imprimer qu'un seul enregistrement (`.print-fiche-only` dans
+  `index.css`).
 - État (filtres, tri, fiche ouverte) encodé dans `location.hash` → lien partageable
-  via le bouton « Copier le lien ».
+  via le bouton « Copier le lien ». Balises Open Graph / Twitter Card dans
+  `index.html` pour les aperçus de lien.
+- Recherche débouncée (~200 ms) : le champ reste réactif, le filtrage et l'écriture
+  dans l'URL attendent une pause de frappe.
+- `ErrorBoundary` racine : un plantage de rendu affiche un message de secours au
+  lieu d'une page blanche.
+- Lien « Signaler une erreur » (footer, panneau de méthodologie, fiche individuelle)
+  → ouvre une issue GitHub pré-remplie sur ce dépôt ; il n'y a pas d'adresse de
+  contact officielle à laquelle se raccrocher, cette page étant non officielle.
+
+### Table basse laissée de côté : en-tête de tableau collant
+
+Un `<thead>` collant a été tenté puis abandonné : le conteneur `overflow-x-auto`
+qui permet le défilement horizontal du tableau large force, par la spécification
+CSS, `overflow-y` à `auto` sur ce même conteneur — qui devient alors le conteneur
+de référence pour `position: sticky` au lieu de la fenêtre. Comme ce conteneur ne
+défile jamais lui-même verticalement (il grandit avec son contenu), l'en-tête ne
+« colle » jamais réellement. Le corriger proprement demanderait soit de borner le
+tableau à une hauteur fixe avec défilement interne (contraire au choix assumé de
+pagination plutôt que de virtualisation), soit un en-tête recalculé en JS
+synchronisé avec le défilement horizontal — complexité jugée disproportionnée pour
+ce gain cosmétique.

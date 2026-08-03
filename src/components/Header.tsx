@@ -5,9 +5,10 @@ interface Props {
   onCopyLink: () => void;
   copyLinkLabel: string;
   onPrint: () => void;
+  onOpenMethodology: () => void;
 }
 
-export function Header({ onExportCSV, onCopyLink, copyLinkLabel, onPrint }: Props) {
+export function Header({ onExportCSV, onCopyLink, copyLinkLabel, onPrint, onOpenMethodology }: Props) {
   return (
     <header className="relative border-b border-line bg-white px-8 pt-[30px] pb-6 pl-10">
       <div className="no-print absolute top-0 bottom-0 left-0 w-[6px] bg-green" />
@@ -41,6 +42,16 @@ export function Header({ onExportCSV, onCopyLink, copyLinkLabel, onPrint }: Prop
         partir du libellé d'infraction, et n'engage pas les autorités. La grâce ne dispense que de la{' '}
         <strong>peine de prison restant à exécuter</strong> — amendes, dommages-intérêts et frais de justice
         demeurent dus.
+        <span className="no-print">
+          {' '}
+          <button
+            onClick={onOpenMethodology}
+            className="cursor-pointer border-none bg-transparent p-0 font-semibold text-green-dark underline hover:text-red"
+          >
+            Voir la méthodologie
+          </button>
+          .
+        </span>
       </div>
     </header>
   );

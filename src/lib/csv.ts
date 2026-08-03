@@ -21,7 +21,8 @@ function esc(v: string | number): string {
   return `"${String(v).replace(/"/g, '""')}"`;
 }
 
-export function exportCSV(rows: Person[]): void {
+/** Pure CSV builder (no BOM) — split out from `exportCSV` so the format can be unit tested without touching the DOM. */
+export function buildCSV(rows: Person[]): string {
   const lines = [HEADERS.map(esc).join(';')];
   rows.forEach((p) => {
     lines.push(
@@ -30,6 +31,10 @@ export function exportCSV(rows: Person[]): void {
         .join(';'),
     );
   });
+  return lines.join('\r\n');
+}
+
+export function exportCSV(rows: Person[]): void {
   // UTF-8 BOM so Excel opens accented characters correctly.
-  downloadFile('grace-presidentielle-2026.csv', '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8;');
+  downloadFile('grace-presidentielle-2026.csv', '﻿' + buildCSV(rows), 'text/csv;charset=utf-8;');
 }

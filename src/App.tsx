@@ -13,13 +13,17 @@ import { PersonTable } from './components/PersonTable';
 import { PersonCards } from './components/PersonCards';
 import { LoadMore } from './components/LoadMore';
 import { DetailPanel } from './components/DetailPanel';
+import { MethodologyModal } from './components/MethodologyModal';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { BUCKETS } from './lib/buckets';
 import { exportCSV } from './lib/csv';
 import { facetOptions, getFiltered, median } from './lib/filtering';
+import { printFiche } from './lib/printFiche';
 import { readHashState, writeHashState } from './lib/urlState';
 import { initialState, VISIBLE_COUNT_STEP, type AppState, type Filters } from './state';
 import type { Density, Person, SortKey } from './types';
+
+const SEARCH_DEBOUNCE_MS = 200;
 
 const data = rawData as Person[];
 
@@ -29,6 +33,7 @@ export default function App() {
   const [state, setState] = useState<AppState>(() => ({ ...initialState, ...readHashState() }));
   const [density, setDensity] = useState<Density>('confortable');
   const [copied, setCopied] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
   const isMobile = useMediaQuery('(max-width: 760px)');
 
   const stateRef = useRef(state);
@@ -87,6 +92,19 @@ export default function App() {
   const set = useCallback((patch: Partial<Filters> & Partial<Pick<AppState, 'selected'>>) => {
     setState((s) => ({ ...s, ...patch, visibleCount: initialState.visibleCount }));
   }, []);
+
+  // The search box stays immediately responsive; the actual filter (and the URL-hash
+  // write it triggers) is debounced so fast typing doesn't churn the URL or recompute
+  // facet counts on every keystroke.
+  const [searchInput, setSearchInput] = useState(state.search);
+  useEffect(() => {
+    setSearchInput(state.search);
+  }, [state.search]);
+  useEffect(() => {
+    if (searchInput === state.search) return;
+    const t = setTimeout(() => set({ search: searchInput }), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [searchInput, state.search, set]);
 
   const toggleFilter = useCallback((key: FacetFilterKey, value: string) => {
     setState((s) => ({ ...s, [key]: s[key] === value ? '' : value, visibleCount: initialState.visibleCount }));
@@ -174,74 +192,85 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <FlagStripe />
-      <Header
-        onExportCSV={onExportCSV}
-        onCopyLink={onCopyLink}
-        copyLinkLabel={copied ? 'Lien copié ✓' : 'Copier le lien'}
-        onPrint={onPrint}
-      />
-
-      <main className="mx-auto max-w-[1440px] px-8 pt-[26px] pb-[70px]">
-        <StatsCartouche stats={stats} />
-
-        <ChartsSection data={data} filters={state} toggleFilter={toggleFilter} setCourAndCat={setCourAndCat} />
-
-        <FilterBar
-          search={state.search}
-          onSearchChange={(e) => set({ search: e.target.value })}
-          filterCour={state.filterCour}
-          courOptions={courOptions}
-          onCourChange={(e) => set({ filterCour: e.target.value })}
-          filterTrib={state.filterTrib}
-          tribOptions={tribOptions}
-          onTribChange={(e) => set({ filterTrib: e.target.value })}
-          filterCat={state.filterCat}
-          catOptions={catOptions}
-          onCatChange={(e) => set({ filterCat: e.target.value })}
-          filterPrison={state.filterPrison}
-          prisonOptions={prisonOptions}
-          onPrisonChange={(e) => set({ filterPrison: e.target.value })}
-          onReset={onResetFilters}
+      <div className="app-chrome">
+        <FlagStripe />
+        <Header
+          onExportCSV={onExportCSV}
+          onCopyLink={onCopyLink}
+          copyLinkLabel={copied ? 'Lien copié ✓' : 'Copier le lien'}
+          onPrint={onPrint}
+          onOpenMethodology={() => setShowMethodology(true)}
         />
 
-        <FilterChips chips={chips} />
+        <main className="mx-auto max-w-[1440px] px-8 pt-[26px] pb-[70px]">
+          <StatsCartouche stats={stats} />
 
-        <ResultsBar
-          resultLabel={resultLabel}
-          sortKey={state.sortKey}
-          sortDir={state.sortDir}
-          onSort={sortBy}
-          density={density}
-          onToggleDensity={() => setDensity((d) => (d === 'compacte' ? 'confortable' : 'compacte'))}
-        />
+          <ChartsSection data={data} filters={state} toggleFilter={toggleFilter} setCourAndCat={setCourAndCat} />
 
-        {filtered.length === 0 ? (
-          <EmptyState onReset={onResetFilters} />
-        ) : isMobile ? (
-          <PersonCards rows={shown} maxDuree={maxDuree} query={query} selected={state.selected} onSelect={onSelect} />
-        ) : (
-          <PersonTable
-            rows={shown}
-            maxDuree={maxDuree}
-            query={query}
-            density={density}
-            selected={state.selected}
-            onSelect={onSelect}
+          <FilterBar
+            search={searchInput}
+            onSearchChange={(e) => setSearchInput(e.target.value)}
+            filterCour={state.filterCour}
+            courOptions={courOptions}
+            onCourChange={(e) => set({ filterCour: e.target.value })}
+            filterTrib={state.filterTrib}
+            tribOptions={tribOptions}
+            onTribChange={(e) => set({ filterTrib: e.target.value })}
+            filterCat={state.filterCat}
+            catOptions={catOptions}
+            onCatChange={(e) => set({ filterCat: e.target.value })}
+            filterPrison={state.filterPrison}
+            prisonOptions={prisonOptions}
+            onPrisonChange={(e) => set({ filterPrison: e.target.value })}
+            onReset={onResetFilters}
           />
-        )}
 
-        <LoadMore remaining={remaining} total={filtered.length} onShowMore={onShowMore} onShowAll={onShowAll} />
+          <FilterChips chips={chips} />
 
-        <p className="mt-[14px] text-[11px] leading-[1.6] text-muted">
-          * Catégorisation indicative établie à partir du libellé de l'infraction ; ne constitue pas une
-          qualification officielle. « Reliquat remis » = écart entre la fin normale de peine et la date du
-          décret (31 juillet 2026), arrondi au mois — indicatif également.
-          <br />
-          Navigation clavier : <strong>↑ ↓</strong> parcourir les fiches · <strong>← →</strong> fiche
-          précédente / suivante · <strong>Échap</strong> fermer.
-        </p>
-      </main>
+          <ResultsBar
+            resultLabel={resultLabel}
+            sortKey={state.sortKey}
+            sortDir={state.sortDir}
+            onSort={sortBy}
+            density={density}
+            onToggleDensity={() => setDensity((d) => (d === 'compacte' ? 'confortable' : 'compacte'))}
+          />
+
+          {filtered.length === 0 ? (
+            <EmptyState onReset={onResetFilters} />
+          ) : isMobile ? (
+            <PersonCards
+              rows={shown}
+              maxDuree={maxDuree}
+              query={query}
+              selected={state.selected}
+              onSelect={onSelect}
+            />
+          ) : (
+            <PersonTable
+              rows={shown}
+              maxDuree={maxDuree}
+              query={query}
+              density={density}
+              selected={state.selected}
+              onSelect={onSelect}
+            />
+          )}
+
+          <LoadMore remaining={remaining} total={filtered.length} onShowMore={onShowMore} onShowAll={onShowAll} />
+
+          <p className="mt-[14px] text-[11px] leading-[1.6] text-muted">
+            * Catégorisation indicative établie à partir du libellé de l'infraction ; ne constitue pas une
+            qualification officielle. « Reliquat remis » = écart entre la fin normale de peine et la date du
+            décret (31 juillet 2026), arrondi au mois — indicatif également.
+            <br />
+            Navigation clavier : <strong>↑ ↓</strong> parcourir les fiches · <strong>← →</strong> fiche
+            précédente / suivante · <strong>Échap</strong> fermer.
+          </p>
+        </main>
+
+        <Footer onOpenMethodology={() => setShowMethodology(true)} />
+      </div>
 
       {selected && (
         <DetailPanel
@@ -253,10 +282,11 @@ export default function App() {
           onFilterSameCour={() => set({ filterCour: selected.cour, selected: null })}
           onFilterSameCat={() => set({ filterCat: selected.cat, selected: null })}
           onFilterSamePrison={() => set({ filterPrison: selected.prison, selected: null })}
+          onPrintFiche={printFiche}
         />
       )}
 
-      <Footer />
+      {showMethodology && <MethodologyModal data={data} onClose={() => setShowMethodology(false)} />}
     </div>
   );
 }
